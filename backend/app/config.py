@@ -6,9 +6,11 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / '.env')
 
+_data_root = Path('/tmp/atomic-health') if os.getenv('VERCEL') else ROOT / 'data'
+
 @dataclass
 class Settings:
-    database_path: Path = ROOT / os.getenv('DATABASE_PATH', 'data/health-twin.sqlite3')
+    database_path: Path = _data_root / os.getenv('DATABASE_PATH', 'health-twin.sqlite3')
     seed_demo: bool = os.getenv('SEED_DEMO', 'true').lower() == 'true'
     app_origin: str = os.getenv('APP_ORIGIN', 'http://127.0.0.1:5174')
     anthropic_api_key: str = os.getenv('ANTHROPIC_API_KEY', '')

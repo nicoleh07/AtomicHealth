@@ -1,0 +1,1 @@
+{"name":"health-twin","version":"1.0.0","private":true,"scripts":{"dev":"python3 scripts/dev.py","build":"npm --prefix frontend run build","test":"backend/.venv/bin/python -m pytest backend/tests -q"}}

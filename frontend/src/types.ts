@@ -1,0 +1,10 @@
+export type Metric={id:string;source:string;type:string;value:number;unit:string;timestamp:string;origin:string};
+export type Connection={provider:string;status:'connected'|'disconnected';allowed:number;mode:'demo'|'live';last_synced:string|null};
+export type Message={id:string;role:'user'|'twin';content:string;cited_sources:string[];mode:string;created_at?:string};
+export type Profile={name:string;age:number;height:number;conditions:string;meds:string;target_weight:number;protein_goal:number;calorie_goal:number;move_goal:number;twin_name:string;tone:string;nudge_freq:string;quiet_start:number;quiet_end:number;avatar:string;timezone:string};
+export type State={profile:Profile;metrics:Metric[];connections:Connection[];meals:any[];messages:Message[];nudges:any[];reports:any[];insights:any[];aiEnabled:boolean;deleted:boolean;integrationStatus:Record<string,{configured:boolean;supports_push:boolean}>;serverDate:string};
+export const providers=[{id:'oura',name:'Oura Ring',short:'Oura',description:'Sleep, recovery & readiness',icon:'moon',color:'blue'},{id:'renpho_scale',name:'RENPHO Body',short:'RENPHO',description:'Body composition & weight',icon:'scale',color:'peach'},{id:'renpho_food',name:'RENPHO Food',short:'RENPHO Food',description:'Meals, portions & nutrition',icon:'food',color:'yellow'},{id:'apple_watch',name:'Apple Watch',short:'Apple Watch',description:'Movement, workouts & activity',icon:'watch',color:'green'},{id:'lumen',name:'Lumen',short:'Lumen',description:'Metabolism & fuel use',icon:'wind',color:'purple'}];
+export function latest(s:State,type:string):number|null{return [...s.metrics].reverse().find(m=>m.type===type)?.value??null;}
+export function format(v:number|null|undefined,d=0){return v===null||v===undefined?'—':v.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});}
+export const dateLabel=(v:string|null|undefined)=>v?new Date(v).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}):'Not synced';
+export type ViewProps={s:State;refresh:()=>Promise<void>};

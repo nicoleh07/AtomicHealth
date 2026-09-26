@@ -1,0 +1,11 @@
+[project]
+name = "health-twin-backend"
+version = "1.0.0"
+description = "FastAPI health companion and Python integration backend"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.30,<1", "httpx>=0.27,<1", "pydantic>=2.9,<3", "python-multipart>=0.0.18,<1", "python-dotenv>=1,<2"]
+[dependency-groups]
+dev = ["pytest>=8,<10"]
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

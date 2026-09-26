@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import datetime,timezone,timedelta,date
 from pathlib import Path
-import asyncio, json, logging, secrets, sqlite3, uuid
+import asyncio, json, logging, re, secrets, sqlite3, uuid
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Header, Query
 from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,12 +26,13 @@ def create_app(settings:Settings|None=None):
     app=FastAPI(title='Health Twin API',version='1.0.0',description='Local single-user React + Python health journal. Integration endpoints accept normalized readings with a bearer token.',lifespan=lifespan)
     app.state.db=db;app.state.registry=registry;app.state.settings=settings
     origins=list({settings.app_origin,'http://localhost:5174','http://127.0.0.1:5174','http://localhost:8000','http://127.0.0.1:8000'})
-    app.add_middleware(CORSMiddleware,allow_origins=origins,allow_methods=['GET','POST','PUT','DELETE'],allow_headers=['Content-Type','Authorization'])
-    app.add_middleware(TrustedHostMiddleware,allowed_hosts=['localhost','127.0.0.1','testserver'])
+    _vercel_origin=re.compile(r'^https://[^/]+\.vercel\.app$')
+    app.add_middleware(CORSMiddleware,allow_origins=origins,allow_origin_regex=r'https://[^/]+\.vercel\.app',allow_methods=['GET','POST','PUT','DELETE'],allow_headers=['Content-Type','Authorization'])
+    app.add_middleware(TrustedHostMiddleware,allowed_hosts=['localhost','127.0.0.1','testserver','*.vercel.app'])
     @app.middleware('http')
     async def same_origin(request:Request,call_next):
         # Protect local mutations against browser requests from unrelated websites.
-        if request.method not in ('GET','HEAD','OPTIONS') and request.headers.get('origin') and request.headers['origin'] not in origins:
+        if request.method not in ('GET','HEAD','OPTIONS') and request.headers.get('origin') and request.headers['origin'] not in origins and not _vercel_origin.match(request.headers['origin']):
             return JSONResponse({'detail':'This origin is not permitted.'},status_code=403)
         response=await call_next(request)
         if request.url.path.startswith('/api'):response.headers['Cache-Control']='no-store'

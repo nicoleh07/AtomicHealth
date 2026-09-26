@@ -206,7 +206,11 @@ def create_app(settings:Settings|None=None):
         result={'upload_id':uid,'filename':file.filename,'mode':'manual','fields':{},'confidence':{},'message':'Automatic extraction is not enabled. Enter and verify the values from your report.'}
         if settings.live_ai:
             try:result.update(await extract_report(settings,content,mime));result.update(mode='extracted',message='Review extracted values. Low-confidence fields are highlighted.')
-            except Exception:result['message']='Automatic extraction could not read this file reliably. Please enter the values manually.'
+            except Exception as exc:
+                logger.warning('report_extract: extraction failed (%s); falling back to manual',type(exc).__name__,exc_info=True)
+                result['message']='Automatic extraction could not read this file reliably. Please enter the values manually.'
+        else:
+            logger.info('report_extract: manual mode — ANTHROPIC_API_KEY not set')
         return result
     @app.get('/api/reports/files/{upload_id}')
     def report_file(upload_id:str):

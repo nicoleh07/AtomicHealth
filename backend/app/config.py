@@ -21,4 +21,4 @@ class Settings:
 
     @property
     def live_ai(self):
-        return self.ai_enabled and bool(self.anthropic_api_key)
+        return bool(self.anthropic_api_key)
